@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="msapplication-tap-highlight" content="no" />
+  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+  <title>FamilySearch</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/framework7.ios.custom.min.css">
+</head>
+<body>
+  <!-- Status bar overlay for fullscreen mode-->
+  <div class="statusbar-overlay"></div>
+
+  <!-- Menu panel -->
+  <div class="panel-overlay"></div>
+  <div class="panel panel-right panel-cover">
+    <div class="content-block">
+      <a href="index.html" class="item-link close-panel">
+        <div class="item-content">
+          <div class="item-inner"> 
+            <div class="item-title">Home</div>
+          </div>
+        </div>
+      </a>
+        <a href="tree.html" class="item-link close-panel treeNavLink">
+            <div class="item-content"> 
+              <div class="item-inner">
+                <div class="item-title">Tree</div>
+              </div>
+            </div></a>
+        <a href="memories.html" class="item-link close-panel">
+            <div class="item-content"> 
+              <div class="item-inner">
+                <div class="item-title">Memories</div>
+              </div>
+            </div></a>
+    </div>
+  </div>
+
+  <!-- Views-->
+  <div class="views">
+    <div class="view view-main">
+      <div class="navbar">
+        <div class="navbar-inner">
+          <div class="center sliding">FamilySearch Sample App</div>
+          <div class="right">
+            <!-- Right link contains only icon - additional "icon-only" class-->
+            <a href="#" data-panel="right" class="link icon-only open-panel"> <i class="icon icon-bars"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pages -->
+      <div class="pages navbar-through toolbar-through">
+        <div data-page="home" class="page">
+          <div class="page-content">
+            <div class="login">
+              <img src="img/familysearchlogo.png">
+              <div class="list-block">
+                <ul>
+                  <li>
+                    <div class="item-content">
+                      <div class="item-title label">Username</div>
+                      <div class="item-input">
+                        <input type="text" placeholder="Your name" class="username" />
+                      </div>
+                    </div>
+                  </li>
+                  <li>
+                    <div class="item-content">
+                      <div class="item-title label">Password</div>
+                      <div class="item-input">
+                        <input type="password" placeholder="Password" class="password" />
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              <input type="submit" value="Login" class="loginButton button button-big button-fill color-blue"/>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="cordova.js"></script>
+  <script type="text/javascript" src="js/index.js"></script>
+  <script type="text/javascript" src="js/framework7.custom.min.js"></script>
+  <script type="text/javascript" src="js/logic.js"></script>
+  <script type="text/javascript">app.initialize();</script>
+</body>
+</html>
