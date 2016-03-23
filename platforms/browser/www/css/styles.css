@@ -4,6 +4,8 @@
 .treePersonThumb { width: 44px; border-radius: 50%; }
 .personDetails { text-align: center; }
 .personDetails img { border-radius: 50%; }
+.panel .item-title { font-size: 20px; margin-bottom: 15px; padding-left: 20px; }
+.login { width: 300px; }
 
 /* PhoneGap */
 * {
@@ -31,7 +33,6 @@ body {
     height:100%;
     margin:0px;
     padding:0px;
-    text-transform:uppercase;
     width:100%;
 }
 
