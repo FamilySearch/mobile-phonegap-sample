@@ -38,7 +38,7 @@ var myApp = new Framework7();
 var $$ = Dom7;
 var domain = "https://familysearch.org";
 var ident = "https://ident.familysearch.org";
-var client_id = "9S7F-TZF4-F764-XCW5-5FYT-MSGJ-C1LV-9VVJ";
+var client_id = "";
 var access_token = null;
 var user = null;
 
