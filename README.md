@@ -9,7 +9,7 @@ For other sample apps and SDK information see <https://familysearch.org/develope
 
 # Build Steps
 * [Customize your framework7 library](http://framework7.io/docs/custom-build.html)
-* Put your client Id (Developer Key) in js/logic.js. (Register [here](https://familysearch.org/developers/docs/guides/gs1-overview) to get your Client ID.)
+* Put your App Key in js/logic.js. (Register [here](https://familysearch.org/developers/docs/guides/gs1-overview) to get your Client ID.)
 
 # Steps to Run
 1. Run: `phonegap serve --browser`

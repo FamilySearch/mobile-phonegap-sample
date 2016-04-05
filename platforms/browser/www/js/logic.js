@@ -6,29 +6,16 @@ var app = {
   initialize: function() {
     this.bindEvents();
   },
-  // Bind Event Listeners
-  //
   // Bind any events that are required on startup. Common events are:
   // 'load', 'deviceready', 'offline', and 'online'.
   bindEvents: function() {
     document.addEventListener('deviceready', this.onDeviceReady, false);
   },
-  // deviceready Event Handler
-  //
   // The scope of 'this' is the event. In order to call the 'receivedEvent'
   // function, we must explicitly call 'app.receivedEvent(...);'
   onDeviceReady: function() {
-    app.receivedEvent('deviceready');
+    console.log("App Ready");
   },
-  // Update DOM on a Received Event
-  receivedEvent: function(id) {
-    var parentElement = document.getElementById(id);
-    var listeningElement = parentElement.querySelector('.listening');
-    var receivedElement = parentElement.querySelector('.received');
-    listeningElement.setAttribute('style', 'display:none;');
-    receivedElement.setAttribute('style', 'display:block;');
-    console.log('Received Event: ' + id);
-  }
 };
 
 // =========
@@ -36,29 +23,53 @@ var app = {
 // =========
 var myApp = new Framework7();
 var $$ = Dom7;
-var domain = "https://familysearch.org";
-var ident = "https://ident.familysearch.org";
+// var client_id = "ENTER_APP_KEY_HERE";
 var client_id = "9S7F-TZF4-F764-XCW5-5FYT-MSGJ-C1LV-9VVJ";
 var access_token = null;
+var auth_url = null;
+var current_user = null;
+var current_person = null;
 var user = null;
 
 // Add view
 var mainView = myApp.addView('.view-main', { dynamicNavbar: true });
 
-// Home Page
-myApp.onPageInit('home', function (page) {
-});
+// Get FamilySearch API endpoints via the Discovery Service
+$$.ajax({
+  url: 'https://familysearch.org/platform/collection',
+  headers: { Accept: 'application/json' },
+  statusCode: {
+    200: function (xhr) {
+      rsp = JSON.parse(xhr.response);
+      auth_url = rsp.collections[0].links['http://oauth.net/core/2.0/endpoint/token'].href;
+      current_user = rsp.collections[0].links['current-user'].href;
+
+      // Get Tree collection to get Current Tree Person
+      $$.ajax({
+        url: rsp.collections[0].links['family-tree'].href,
+        headers: { Accept: 'application/json' },
+        statusCode: {
+          200: function (xhr) {
+            rsp = JSON.parse(xhr.response);
+            // Get Ancestry endpoint and remove template
+            current_person = rsp.collections[0].links['ancestry-query'].template.split('{')[0];
+          }
+        }
+      });  
+    }
+  }
+});  
 
 // Person Page
 myApp.onPageInit('person', function (page) {
   $$.ajax({
-    url: domain+'/platform/tree/persons/'+page.query.pid,
+    url: page.query.url,
     headers: { Accept: 'application/json', Authorization: 'Bearer '+access_token },
     statusCode: {
       200: function (xhr) {
         var person = JSON.parse(xhr.response);
         console.log(person.persons[0].display.name);
-        $$('.personPortrait').attr({ src: domain+'/platform/tree/persons/'+person.persons[0].id+'/portrait?access_token='+access_token+'&default=http://fsicons.org/wp-content/uploads/2014/10/gender-unknown-circle-2XL.png'} );
+        $$('.personPortrait').attr({ src: page.query.url+'/portrait?access_token='+access_token+'&default=http://fsicons.org/wp-content/uploads/2014/10/gender-unknown-circle-2XL.png'} );
         $$('.personName').append(person.persons[0].display.name);
         $$('.personBirth').append(person.persons[0].display.birthDate);
         $$('.personDeath').append(person.persons[0].display.deathDate);
@@ -70,18 +81,20 @@ myApp.onPageInit('person', function (page) {
 // Tree Page
 myApp.onPageInit('tree', function (page) {
   $$.ajax({
-    url: domain+"/platform/tree/ancestry?person="+user.personId+"&generations=4",
+    url: current_person+"?person="+user.personId+"&generations=4",
     headers: { Accept: 'application/json', Authorization: 'Bearer '+access_token },
     statusCode: {
       200: function (xhr) {
         user.tree = JSON.parse(xhr.response).persons;
         console.log("Tree Length: "+user.tree.length);
         for (var i=0; i<user.tree.length; i++) {
+          // Remove access_toke from href
+          href = user.tree[i].links.person.href.split("?")[0];
           $$('.tree').append(
             '<li class="contact-item">'+
-            '<a href="person.html?pid='+user.tree[i].id+'" class="item-link">'+
+            '<a href="person.html?url='+href+'" class="item-link">'+
             '  <div class="item-content">'+
-            '    <div class="item-media"><img class="treePersonThumb" src="'+domain+'/platform/tree/persons/'+user.tree[i].id+'/portrait?access_token='+access_token+'&default=http://fsicons.org/wp-content/uploads/2014/10/gender-unknown-circle-2XL.png"></div>'+
+            '    <div class="item-media"><img class="treePersonThumb" src="'+href+'/portrait?access_token='+access_token+'&default=http://fsicons.org/wp-content/uploads/2014/10/gender-unknown-circle-2XL.png"></div>'+
             '    <div class="item-inner">'+
             '      <div class="item-title-row">'+
             '        <div class="item-title">'+user.tree[i].display.name+'</div>'+
@@ -101,13 +114,14 @@ myApp.onPageInit('tree', function (page) {
 // Memories Page
 myApp.onPageInit('memories', function (page) {
   $$.ajax({
-    url: domain+"/platform/memories/users/"+user.id+"/memories",
+    url: user.links.artifacts.href,
     headers: { Accept: 'application/json', Authorization: 'Bearer '+access_token },
     statusCode: {
       200: function (xhr) {
         user.memories = JSON.parse(xhr.response).sourceDescriptions;
+        console.log("Memories: "+user.memories.length);
         for (var i=0; i<40; i++) {
-          // Only look at jpegs
+          // Get JPGs only
           if (user.memories[i].mediaType == "image/jpeg") {
             $$('.memories').append('<div><img src="'+user.memories[i].links['image-thumbnail'].href+'"></div>');
           }
@@ -127,17 +141,18 @@ $$('.loginButton').on('click', function () {
   };
 
   // Authenticate User
-  $$.post(ident+'/cis-web/oauth2/v3/token', creds, function(rsp) {
+  $$.post(auth_url, creds, function(rsp) {
     access_token = JSON.parse(rsp).access_token;
     console.log(access_token);
-
-    // Get logged in user info
+    
+    // Get user PID so we can get tree & memories
     $$.ajax({
-      url: domain+'/platform/users/current',
+      url: current_user,
       headers: { Accept: 'application/json', Authorization: 'Bearer '+access_token },
       statusCode: {
         200: function (xhr) {
           user = JSON.parse(xhr.response).users[0];
+          // Go to the tree page after login
           $$('.treeNavLink').click();
           console.log(user.displayName);
         }
